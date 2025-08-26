@@ -166,13 +166,15 @@ public class FindPathAStar : MonoBehaviour {
 
             BeginSearch();
             hasStarted = true;
-            StartCoroutine(Searching());
         }
 
-        if (searchingHasFinished)
-            ReconstructPath();
+        if(hasStarted && Input.GetKeyDown(KeyCode.S))
+            StartCoroutine(Searching());
 
-        if (PathHasConstructed)
+        if (searchingHasFinished && Input.GetKeyDown(KeyCode.R))
+            StartCoroutine(ReconstructPath());
+
+        if (PathHasConstructed && Input.GetKeyDown(KeyCode.M))
             StartCoroutine(MovePlayer());
     }
 
@@ -190,7 +192,7 @@ public class FindPathAStar : MonoBehaviour {
 
     bool PathHasConstructed = false;
     List<PathMarker> path = new List<PathMarker>();
-    void ReconstructPath()
+    IEnumerator ReconstructPath()
     {
         
         path.Add(closed[closed.Count-1]);
@@ -211,6 +213,8 @@ public class FindPathAStar : MonoBehaviour {
 
             Vector3 pos = new Vector3(step.location.x * maze.scale, 0.0f, step.location.z * maze.scale);
             step.marker = Instantiate(pathP, pos, Quaternion.identity);
+
+            yield return new WaitForSeconds(1f);
         }
 
         PathHasConstructed = true;
