@@ -17,6 +17,6 @@ public class PlayerController : MonoBehaviour
 
         Vector3 movement = new Vector3(moveX, 0f, moveZ) * speed;
 
-        rb.velocity = new Vector3(movement.x, rb.velocity.y, movement.z);
+        rb.linearVelocity = new Vector3(movement.x, rb.linearVelocity.y, movement.z);
     }
 }
