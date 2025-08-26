@@ -57,7 +57,7 @@ public class FindPathAStar : MonoBehaviour {
 
         GameObject goal = GameObject.FindGameObjectWithTag("Goal");
         GameObject player = GameObject.FindGameObjectWithTag("Player");
-       // Destroy(goal);
+        Destroy(goal);
         Destroy(player);
     }
 
@@ -96,9 +96,7 @@ public class FindPathAStar : MonoBehaviour {
     void Search(PathMarker thisNode) {
 
         if (thisNode.Equals(goalNode)) {
-
-              done = true;
-            
+            done = true;            
             return;
         }
 
@@ -115,17 +113,18 @@ public class FindPathAStar : MonoBehaviour {
             float h = Vector2.Distance(neighbour.ToVector(), goalNode.location.ToVector());
             float f = g + h;
 
-            GameObject pathBlock = Instantiate(pathP, new Vector3(neighbour.x * maze.scale, 0.0f, neighbour.z * maze.scale), Quaternion.identity);
-
             if (!UpdateMarker(neighbour, g, h, f, thisNode)) {
-
-                open.Add(new PathMarker(neighbour, g, h, f, pathBlock, thisNode));
+                GameObject pathBlock = Instantiate(pathP, new Vector3(neighbour.x * maze.scale, 0.0f, neighbour.z * maze.scale), Quaternion.identity);
+                PathMarker openEl = new PathMarker(neighbour, g, h, f, pathBlock, thisNode);
+                openEl.marker.GetComponent<Renderer>().material = openMaterial;
+                open.Add(openEl);
             }
         }
         open = open.OrderBy(p => p.F).ToList<PathMarker>();
-        PathMarker pm = (PathMarker)open.ElementAt(0);
-        closed.Add(pm);
+        PathMarker pm = open[0];
 
+        closed.Add(pm);
+        
         open.RemoveAt(0);
         pm.marker.GetComponent<Renderer>().material = closedMaterial;
 
@@ -166,12 +165,9 @@ public class FindPathAStar : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.P)) {
 
             BeginSearch();
-            hasStarted = true;          
+            hasStarted = true;
+            StartCoroutine(Searching());
         }
-        
-
-        if (hasStarted)
-            if (Input.GetKeyDown(KeyCode.C)) Search(lastPos);
 
         if (searchingHasFinished)
             ReconstructPath();
@@ -180,25 +176,16 @@ public class FindPathAStar : MonoBehaviour {
             StartCoroutine(MovePlayer());
     }
 
-    // The coroutine function
     bool searchingHasFinished = false;
     IEnumerator Searching()
     {
-        Debug.Log("searching started!");
-
         while (!done)
         {
-            // Perform some task
-            Debug.Log("Coroutine is running...");
             Search(lastPos);
-            // Wait for the next frame
-            yield return true;
+            yield return new WaitForSeconds(0.2f);
         }
 
         searchingHasFinished = true;
-        yield return null;
-
-        Debug.Log("Coroutine finished!");
     }
 
     bool PathHasConstructed = false;
@@ -214,6 +201,18 @@ public class FindPathAStar : MonoBehaviour {
             p = p.parent;
         }
         path.Insert(0,startNode);
+
+        foreach (var step in path)
+        {
+            if (step.marker != null)
+            {
+                Destroy(step.marker);
+            }
+
+            Vector3 pos = new Vector3(step.location.x * maze.scale, 0.0f, step.location.z * maze.scale);
+            step.marker = Instantiate(pathP, pos, Quaternion.identity);
+        }
+
         PathHasConstructed = true;
     }
    
