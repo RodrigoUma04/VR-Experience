@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Goal
   - marker
+  - Obstacle
+  - Despawner
   layers:
   - Default
   - TransparentFX
